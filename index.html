@@ -204,8 +204,32 @@ main{
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:16px;
-  padding:18px;
+  padding:0;
+  overflow:hidden;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
 }
+.character-media{
+  display:block;
+  width:100%;
+  aspect-ratio:3/2;
+  border:0;
+  border-bottom:1px solid var(--line);
+  padding:0;
+  margin:0;
+  background:#10141d;
+  cursor:zoom-in;
+  overflow:hidden;
+}
+.character-media img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .24s ease, filter .24s ease;
+}
+.character-media:hover img{transform:scale(1.025);filter:brightness(1.05)}
+.character-media:focus-visible{outline:2px solid var(--accent2);outline-offset:-2px}
+.character-content{padding:18px}
 .character .code{
   float:right;
   color:var(--accent);
@@ -219,6 +243,56 @@ main{
 .character .meta{color:var(--accent2);font-size:.88rem;margin-bottom:10px}
 .character p{margin:5px 0;color:var(--muted);font-size:.93rem}
 .character strong{color:var(--text)}
+.image-modal{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  background:rgba(5,7,11,.9);
+  backdrop-filter:blur(8px);
+}
+.image-modal.open{display:flex}
+.image-modal-inner{
+  position:relative;
+  max-width:min(96vw,1600px);
+  max-height:94vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.image-modal img{
+  display:block;
+  max-width:100%;
+  max-height:88vh;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border-radius:12px;
+  box-shadow:0 24px 80px rgba(0,0,0,.55);
+  border:1px solid rgba(217,196,140,.28);
+}
+.image-modal-caption{color:#dce3ec;font-size:.92rem;text-align:center}
+.image-modal-close{
+  position:absolute;
+  top:-18px;
+  right:-18px;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);
+  background:#171b24;
+  color:#fff;
+  font-size:1.65rem;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+.image-modal-close:hover{background:#252c39}
+body.modal-open{overflow:hidden}
 .notice{
   margin-top:20px;
   padding:16px 18px;
@@ -244,6 +318,9 @@ main{
   .faculty,.characters{grid-template-columns:1fr}
   .event{grid-template-columns:1fr;gap:4px}
   .nav{padding-inline:12px}
+  .image-modal{padding:12px}
+  .image-modal-close{top:8px;right:8px}
+  .image-modal img{max-height:84vh}
 }
 </style>
 </head>
@@ -551,7 +628,7 @@ main{
     <section id="characters" class="page">
       <div class="section-head">
         <h2>주요 캐릭터</h2>
-        <p>학년도, 전공도, 학교에서 원하는 것도 서로 다른 사람들. 버튼으로 학생과 교직원을 나눠 볼 수 있습니다.</p>
+        <p>학년도, 전공도, 학교에서 원하는 것도 서로 다른 사람들. 버튼으로 학생과 교직원을 나눠 볼 수 있으며, 프로필 이미지를 클릭하면 크게 볼 수 있습니다.</p>
       </div>
       <div class="character-controls">
         <button class="active" data-filter="all">전체</button>
@@ -560,28 +637,36 @@ main{
       </div>
 
       <div class="characters">
-        <article class="character" data-kind="student"><span class="code">a</span><h3>이리스 벨로아</h3><div class="meta">1학년 · 지팡이학부 · 지도제작회</div><p><strong>지팡이:</strong> 수정맥 / 공명</p><p>지방 공방 출신의 성실한 신입생. 평소에는 조심스럽지만 지팡이 이야기만 나오면 말이 빨라진다.</p></article>
-        <article class="character" data-kind="student"><span class="code">b</span><h3>셀렌 아르도르</h3><div class="meta">2학년 · 아티팩트학부 · 아티팩트 연구회</div><p><strong>지팡이:</strong> 안개 / 교란</p><p>나른하고 무심하지만 미확인 아티팩트 앞에서는 집요해진다. 위험한 호기심의 소유자.</p></article>
-        <article class="character" data-kind="student"><span class="code">c</span><h3>마리엘 로젠</h3><div class="meta">3학년 · 마력생리·의학부 · 약초조제회</div><p><strong>지팡이:</strong> 샘물 / 정화</p><p>다정하고 책임감 강한 선배. 누군가 무리하면 평소보다 훨씬 조용하고 단호해진다.</p></article>
-        <article class="character" data-kind="student"><span class="code">d</span><h3>루네 카시안</h3><div class="meta">1학년 · 고대학·문헌학부 · 고건축 탐사회</div><p><strong>지팡이:</strong> 달빛 / 투영</p><p>겁이 많으면서도 오래된 기록과 괴담은 끝까지 확인하고야 마는 문헌학도.</p></article>
-        <article class="character" data-kind="student"><span class="code">e</span><h3>베로니카 하르트</h3><div class="meta">4학년 · 전투마법학부 · 결투연찬회</div><p><strong>지팡이:</strong> 벼락 / 관통</p><p>귀족 출신 수석 후보. 도도하고 기준이 높지만 실력을 인정한 상대에게는 공정하다.</p></article>
-        <article class="character" data-kind="student"><span class="code">f</span><h3>리아 페른</h3><div class="meta">2학년 · 응용마법학부 · 지팡이 개조 동아리</div><p><strong>지팡이:</strong> 증기 / 추진</p><p>공구와 설비에 강한 생활형 해결사. 생각보다 손이 먼저 움직이고 말도 빠르다.</p></article>
-        <article class="character" data-kind="student"><span class="code">g</span><h3>에델 미르</h3><div class="meta">3학년 · 마법법제·행정부 · 학생재판연구회</div><p><strong>지팡이:</strong> 서릿발 / 봉쇄</p><p>규정과 절차에 강한 원칙주의자. 감정적인 상황일수록 사실부터 정리한다.</p></article>
-        <article class="character" data-kind="student"><span class="code">h</span><h3>노엘라 크레인</h3><div class="meta">2학년 · 탐사·현장학부 · 야외조리회</div><p><strong>지팡이:</strong> 돌풍 / 도약</p><p>낙천적이고 붙임성 좋은 행동파. 위험할 때는 오히려 말이 짧고 현실적이다.</p></article>
-        <article class="character" data-kind="student"><span class="code">i</span><h3>유니아 솔트</h3><div class="meta">1학년 · 응용마법학부 · 온실관리회</div><p><strong>지팡이:</strong> 새싹 / 생장</p><p>느긋하고 다정한 온실 애호가. 부드러워 보이지만 자기 기준에서는 의외로 고집이 세다.</p></article>
-        <article class="character" data-kind="student"><span class="code">j</span><h3>토비아스 글렌</h3><div class="meta">2학년 · 고대학·문헌학부 · 학생신문부</div><p><strong>지팡이:</strong> 메아리 / 전달</p><p>학내 소문과 사람 사이의 분위기에 빠삭한 정보통. 위험한 순간에는 농담이 사라진다.</p></article>
-        <article class="character" data-kind="student"><span class="code">k</span><h3>카이론 벨</h3><div class="meta">4학년 · 탐사·현장학부 · 산악답사회</div><p><strong>지팡이:</strong> 모래바람 / 완충</p><p>평소엔 느긋하고 피곤해 보이지만 현장 판단만큼은 빠른 실전형 선배.</p></article>
-        <article class="character" data-kind="student"><span class="code">l</span><h3>세실 에반스</h3><div class="meta">2학년 · 마법법제·행정부 · 사교연구회</div><p><strong>지팡이:</strong> 꽃가루 / 현혹</p><p>말과 분위기를 다루는 데 능한 사교가. 친해질수록 예쁜 말보다 솔직한 독설이 늘어난다.</p></article>
-        <article class="character" data-kind="student"><span class="code">m</span><h3>프레이아 덴버</h3><div class="meta">3학년 · 전투마법학부 · 호위술 연구회</div><p><strong>지팡이:</strong> 암반 / 방벽</p><p>기사 가문 출신의 직선적인 학생. 책임과 신뢰를 중요하게 여긴다.</p></article>
-        <article class="character" data-kind="student"><span class="code">r</span><h3>레아 모르간</h3><div class="meta">2학년 · 응용마법학부 · 아르벨부</div><p><strong>지팡이:</strong> 상승기류 / 편향</p><p>쾌활하고 승부욕 강한 아르벨 주전 선수. 경기 중에는 몇 단어만으로 동료를 움직인다.</p></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/iris.png" data-name="이리스 벨로아" aria-label="이리스 벨로아 프로필 이미지 크게 보기"><img src="assets/characters/iris.png" alt="이리스 벨로아 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">a</span><h3>이리스 벨로아</h3><div class="meta">1학년 · 지팡이학부 · 지도제작회</div><p><strong>지팡이:</strong> 수정맥 / 공명</p><p>지방 공방 출신의 성실한 신입생. 평소에는 조심스럽지만 지팡이 이야기만 나오면 말이 빨라진다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/selen.png" data-name="셀렌 아르도르" aria-label="셀렌 아르도르 프로필 이미지 크게 보기"><img src="assets/characters/selen.png" alt="셀렌 아르도르 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">b</span><h3>셀렌 아르도르</h3><div class="meta">2학년 · 아티팩트학부 · 아티팩트 연구회</div><p><strong>지팡이:</strong> 안개 / 교란</p><p>나른하고 무심하지만 미확인 아티팩트 앞에서는 집요해진다. 위험한 호기심의 소유자.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/mariel.png" data-name="마리엘 로젠" aria-label="마리엘 로젠 프로필 이미지 크게 보기"><img src="assets/characters/mariel.png" alt="마리엘 로젠 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">c</span><h3>마리엘 로젠</h3><div class="meta">3학년 · 마력생리·의학부 · 약초조제회</div><p><strong>지팡이:</strong> 샘물 / 정화</p><p>다정하고 책임감 강한 선배. 누군가 무리하면 평소보다 훨씬 조용하고 단호해진다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/rune.png" data-name="루네 카시안" aria-label="루네 카시안 프로필 이미지 크게 보기"><img src="assets/characters/rune.png" alt="루네 카시안 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">d</span><h3>루네 카시안</h3><div class="meta">1학년 · 고대학·문헌학부 · 고건축 탐사회</div><p><strong>지팡이:</strong> 달빛 / 투영</p><p>겁이 많으면서도 오래된 기록과 괴담은 끝까지 확인하고야 마는 문헌학도.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/veronica.png" data-name="베로니카 하르트" aria-label="베로니카 하르트 프로필 이미지 크게 보기"><img src="assets/characters/veronica.png" alt="베로니카 하르트 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">e</span><h3>베로니카 하르트</h3><div class="meta">4학년 · 전투마법학부 · 결투연찬회</div><p><strong>지팡이:</strong> 벼락 / 관통</p><p>귀족 출신 수석 후보. 도도하고 기준이 높지만 실력을 인정한 상대에게는 공정하다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/ria.png" data-name="리아 페른" aria-label="리아 페른 프로필 이미지 크게 보기"><img src="assets/characters/ria.png" alt="리아 페른 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">f</span><h3>리아 페른</h3><div class="meta">2학년 · 응용마법학부 · 지팡이 개조 동아리</div><p><strong>지팡이:</strong> 증기 / 추진</p><p>공구와 설비에 강한 생활형 해결사. 생각보다 손이 먼저 움직이고 말도 빠르다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/edel.png" data-name="에델 미르" aria-label="에델 미르 프로필 이미지 크게 보기"><img src="assets/characters/edel.png" alt="에델 미르 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">g</span><h3>에델 미르</h3><div class="meta">3학년 · 마법법제·행정부 · 학생재판연구회</div><p><strong>지팡이:</strong> 서릿발 / 봉쇄</p><p>규정과 절차에 강한 원칙주의자. 감정적인 상황일수록 사실부터 정리한다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/noella.png" data-name="노엘라 크레인" aria-label="노엘라 크레인 프로필 이미지 크게 보기"><img src="assets/characters/noella.png" alt="노엘라 크레인 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">h</span><h3>노엘라 크레인</h3><div class="meta">2학년 · 탐사·현장학부 · 야외조리회</div><p><strong>지팡이:</strong> 돌풍 / 도약</p><p>낙천적이고 붙임성 좋은 행동파. 위험할 때는 오히려 말이 짧고 현실적이다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/yunia.png" data-name="유니아 솔트" aria-label="유니아 솔트 프로필 이미지 크게 보기"><img src="assets/characters/yunia.png" alt="유니아 솔트 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">i</span><h3>유니아 솔트</h3><div class="meta">1학년 · 응용마법학부 · 온실관리회</div><p><strong>지팡이:</strong> 새싹 / 생장</p><p>느긋하고 다정한 온실 애호가. 부드러워 보이지만 자기 기준에서는 의외로 고집이 세다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/tobias.png" data-name="토비아스 글렌" aria-label="토비아스 글렌 프로필 이미지 크게 보기"><img src="assets/characters/tobias.png" alt="토비아스 글렌 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">j</span><h3>토비아스 글렌</h3><div class="meta">2학년 · 고대학·문헌학부 · 학생신문부</div><p><strong>지팡이:</strong> 메아리 / 전달</p><p>학내 소문과 사람 사이의 분위기에 빠삭한 정보통. 위험한 순간에는 농담이 사라진다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/kairon.png" data-name="카이론 벨" aria-label="카이론 벨 프로필 이미지 크게 보기"><img src="assets/characters/kairon.png" alt="카이론 벨 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">k</span><h3>카이론 벨</h3><div class="meta">4학년 · 탐사·현장학부 · 산악답사회</div><p><strong>지팡이:</strong> 모래바람 / 완충</p><p>평소엔 느긋하고 피곤해 보이지만 현장 판단만큼은 빠른 실전형 선배.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/cecil.png" data-name="세실 에반스" aria-label="세실 에반스 프로필 이미지 크게 보기"><img src="assets/characters/cecil.png" alt="세실 에반스 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">l</span><h3>세실 에반스</h3><div class="meta">2학년 · 마법법제·행정부 · 사교연구회</div><p><strong>지팡이:</strong> 꽃가루 / 현혹</p><p>말과 분위기를 다루는 데 능한 사교가. 친해질수록 예쁜 말보다 솔직한 독설이 늘어난다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/freya.png" data-name="프레이아 덴버" aria-label="프레이아 덴버 프로필 이미지 크게 보기"><img src="assets/characters/freya.png" alt="프레이아 덴버 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">m</span><h3>프레이아 덴버</h3><div class="meta">3학년 · 전투마법학부 · 호위술 연구회</div><p><strong>지팡이:</strong> 암반 / 방벽</p><p>기사 가문 출신의 직선적인 학생. 책임과 신뢰를 중요하게 여긴다.</p></div></article>
+        <article class="character" data-kind="student"><button class="character-media" type="button" data-full="assets/characters/lea.png" data-name="레아 모르간" aria-label="레아 모르간 프로필 이미지 크게 보기"><img src="assets/characters/lea.png" alt="레아 모르간 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">r</span><h3>레아 모르간</h3><div class="meta">2학년 · 응용마법학부 · 아르벨부</div><p><strong>지팡이:</strong> 상승기류 / 편향</p><p>쾌활하고 승부욕 강한 아르벨 주전 선수. 경기 중에는 몇 단어만으로 동료를 움직인다.</p></div></article>
 
-        <article class="character" data-kind="staff"><span class="code">n</span><h3>세라핀 도베르</h3><div class="meta">지팡이학부 부교수</div><p><strong>지팡이:</strong> 진눈깨비 / 고정</p><p>귀속 이론과 안정성 검증의 권위자. 정확하고 엄격하며 아끼는 학생에게 더 가혹하다.</p></article>
-        <article class="character" data-kind="staff"><span class="code">o</span><h3>헬레나 모르비</h3><div class="meta">아티팩트학부 교수</div><p><strong>지팡이:</strong> 박무 / 감응</p><p>고위험 유물 연구자. 부드러운 말투로 학생을 시험하고 흥미로운 반응을 놓치지 않는다.</p></article>
-        <article class="character" data-kind="staff"><span class="code">p</span><h3>드리안 크로프트</h3><div class="meta">고대학·문헌학부 교수</div><p><strong>지팡이:</strong> 미풍 / 탐지</p><p>제1마탑의 초기 기록에 밝은 학자. 이야기는 자주 새지만 중요한 순간의 통찰은 날카롭다.</p></article>
-        <article class="character" data-kind="staff"><span class="code">q</span><h3>마틸다 웨인</h3><div class="meta">중앙도서관 사서 · 자료실 담당</div><p><strong>지팡이:</strong> 반딧불 / 표식</p><p>학교 사정과 열람기록에 밝은 사서. 늘 친절하지만 수상한 행동은 웃으면서 끝까지 묻는다.</p></article>
+        <article class="character" data-kind="staff"><button class="character-media" type="button" data-full="assets/characters/seraphine.png" data-name="세라핀 도베르" aria-label="세라핀 도베르 프로필 이미지 크게 보기"><img src="assets/characters/seraphine.png" alt="세라핀 도베르 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">n</span><h3>세라핀 도베르</h3><div class="meta">지팡이학부 부교수</div><p><strong>지팡이:</strong> 진눈깨비 / 고정</p><p>귀속 이론과 안정성 검증의 권위자. 정확하고 엄격하며 아끼는 학생에게 더 가혹하다.</p></div></article>
+        <article class="character" data-kind="staff"><button class="character-media" type="button" data-full="assets/characters/helena.png" data-name="헬레나 모르비" aria-label="헬레나 모르비 프로필 이미지 크게 보기"><img src="assets/characters/helena.png" alt="헬레나 모르비 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">o</span><h3>헬레나 모르비</h3><div class="meta">아티팩트학부 교수</div><p><strong>지팡이:</strong> 박무 / 감응</p><p>고위험 유물 연구자. 부드러운 말투로 학생을 시험하고 흥미로운 반응을 놓치지 않는다.</p></div></article>
+        <article class="character" data-kind="staff"><button class="character-media" type="button" data-full="assets/characters/drian.png" data-name="드리안 크로프트" aria-label="드리안 크로프트 프로필 이미지 크게 보기"><img src="assets/characters/drian.png" alt="드리안 크로프트 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">p</span><h3>드리안 크로프트</h3><div class="meta">고대학·문헌학부 교수</div><p><strong>지팡이:</strong> 미풍 / 탐지</p><p>제1마탑의 초기 기록에 밝은 학자. 이야기는 자주 새지만 중요한 순간의 통찰은 날카롭다.</p></div></article>
+        <article class="character" data-kind="staff"><button class="character-media" type="button" data-full="assets/characters/matilda.png" data-name="마틸다 웨인" aria-label="마틸다 웨인 프로필 이미지 크게 보기"><img src="assets/characters/matilda.png" alt="마틸다 웨인 프로필 카드" loading="lazy"></button><div class="character-content"><span class="code">q</span><h3>마틸다 웨인</h3><div class="meta">중앙도서관 사서 · 자료실 담당</div><p><strong>지팡이:</strong> 반딧불 / 표식</p><p>학교 사정과 열람기록에 밝은 사서. 늘 친절하지만 수상한 행동은 웃으면서 끝까지 묻는다.</p></div></article>
       </div>
     </section>
   </main>
+
+  <div id="imageModal" class="image-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="캐릭터 프로필 이미지 크게 보기">
+    <div class="image-modal-inner">
+      <button class="image-modal-close" type="button" aria-label="닫기">×</button>
+      <img id="imageModalImg" src="" alt="">
+      <div id="imageModalCaption" class="image-modal-caption"></div>
+    </div>
+  </div>
 
   <footer class="footer">
     레이에 학술 마법 아카데미 · 세계관/캐릭터 소개 페이지
@@ -613,6 +698,44 @@ filterButtons.forEach(btn=>{
       c.style.display=(f==='all'||c.dataset.kind===f)?'block':'none';
     });
   });
+});
+
+const imageModal=document.getElementById('imageModal');
+const imageModalImg=document.getElementById('imageModalImg');
+const imageModalCaption=document.getElementById('imageModalCaption');
+const imageModalClose=imageModal.querySelector('.image-modal-close');
+let lastFocusedElement=null;
+
+function openImageModal(button){
+  lastFocusedElement=button;
+  const src=button.dataset.full;
+  const name=button.dataset.name || button.querySelector('img')?.alt || '캐릭터 프로필';
+  imageModalImg.src=src;
+  imageModalImg.alt=name+' 프로필 카드 확대 이미지';
+  imageModalCaption.textContent=name+' · 클릭하거나 ESC 키로 닫기';
+  imageModal.classList.add('open');
+  imageModal.setAttribute('aria-hidden','false');
+  document.body.classList.add('modal-open');
+  imageModalClose.focus();
+}
+
+function closeImageModal(){
+  imageModal.classList.remove('open');
+  imageModal.setAttribute('aria-hidden','true');
+  imageModalImg.src='';
+  document.body.classList.remove('modal-open');
+  if(lastFocusedElement) lastFocusedElement.focus();
+}
+
+document.querySelectorAll('.character-media').forEach(button=>{
+  button.addEventListener('click',()=>openImageModal(button));
+});
+imageModalClose.addEventListener('click',closeImageModal);
+imageModal.addEventListener('click',event=>{
+  if(event.target===imageModal || event.target===imageModalImg) closeImageModal();
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape' && imageModal.classList.contains('open')) closeImageModal();
 });
 
 const start=location.hash.replace('#','');
